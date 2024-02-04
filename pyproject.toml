@@ -15,7 +15,7 @@ authors = [
 name = "shell_executor_lib"
 version = "0.1.0"
 description = "Seed for python projects"
-keywords = ["Python", "Library", "Seed", "Skeleton"]
+keywords = ["Python", "Library", "Commands"]
 license = "Apache License"
 
 maintainers = [

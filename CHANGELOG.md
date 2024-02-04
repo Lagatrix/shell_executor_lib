@@ -5,6 +5,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [0.1.0] - 2024-02-04
 ### Added
-- @javierfh03 - Add command manager with unit test
+- @javierfh03 - Add command manager with units test
 
 [0.1.0]: https://github.com/Lagatrix/shell_executor_lib.git

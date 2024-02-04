@@ -30,7 +30,7 @@ class CommandManager:
             A list with the response from the command.
 
         Raises:
-            CommandError: If the exist code is not 0.
+            CommandError: If the exit code is not 0.
 
         """
         process = await asyncio.create_subprocess_shell(
