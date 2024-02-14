@@ -1,6 +1,6 @@
 [project]
 name = "shell_executor_lib"
-version = "0.1.0"
+version = "0.1.1"
 description = "This library execute async commands in shell"
 
 maintainers = [
@@ -13,7 +13,7 @@ authors = [
 
 [tool.poetry]
 name = "shell_executor_lib"
-version = "0.1.0"
+version = "0.1.1"
 description = "Seed for python projects"
 keywords = ["Python", "Library", "Commands"]
 license = "Apache License"
@@ -57,6 +57,7 @@ nose2 = "^0.12"
 nose2-html-report = "^0.6"
 pep8-naming = "^0.13"
 python-kacl = "^0.3"
+pytest = "^8.0"
 
 [tool.poetry.group.dev]
 optional = true
