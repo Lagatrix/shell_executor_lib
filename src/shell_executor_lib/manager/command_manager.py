@@ -34,13 +34,13 @@ class CommandManager:
 
         """
         process = await asyncio.create_subprocess_shell(
-            f"su - {self.user} -c {'sudo -S ' if sudo else ''}{command}",
+            f"su - {self.user} -c {'/bin/sudo -S ' if sudo else ''}{command}",
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
 
-        await self._set_stdin(process, sudo, *stdin)
+        await self.__set_stdin(process, sudo, *stdin)
 
         if process.stdout and process.stderr is not None:
             output, error = await asyncio.gather(process.stdout.read(), process.stderr.read())
@@ -54,16 +54,13 @@ class CommandManager:
         else:
             raise CommandError(-2, "Stdout and stderr read error")
 
-    async def _set_stdin(self, process: Process, sudo: bool, *stdin: str) -> None:
+    async def __set_stdin(self, process: Process, sudo: bool, *stdin: str) -> None:
         """Put the stdin data into the command.
 
         Args:
             process: The process of the command to exec.
             sudo: If the command require sudo privileges.
             *stdin: Stdin params of the command.
-
-        Returns:
-            None.
         """
         if process.stdin is not None:
             process.stdin.write(self.password.encode() + b"\n")
