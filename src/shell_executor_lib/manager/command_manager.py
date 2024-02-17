@@ -44,6 +44,7 @@ class CommandManager:
 
         if process.stdout and process.stderr is not None:
             output, error = await asyncio.gather(process.stdout.read(), process.stderr.read())
+            await process.wait()
 
             if isinstance(process.returncode, int):
                 if process.returncode != 0:
