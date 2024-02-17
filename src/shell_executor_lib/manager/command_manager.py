@@ -34,7 +34,7 @@ class CommandManager:
 
         """
         process = await asyncio.create_subprocess_shell(
-            f"su - {self.user} -c {'/bin/sudo -S ' if sudo else ''}{command}",
+            f"su - {self.user} -c \"{'sudo -S ' if sudo else ''}{command}\"",
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
