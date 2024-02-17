@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased] - 2024-02-17
 ### Fixed
 - @javierfh03 - Fix error when execute complex commands.
+- @javierfh03 - Fix error when return additional line in list in the output from command.
 
 ## [0.1.1] - 2024-02-14
 ### Changed

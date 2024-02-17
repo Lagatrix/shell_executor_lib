@@ -48,7 +48,7 @@ class CommandManager:
             if isinstance(process.returncode, int):
                 if process.returncode != 0:
                     raise CommandError(int(process.returncode), error.decode())
-                return output.decode().split("\n")
+                return output.decode().rstrip().split("\n")
 
             raise CommandError(-1, "Not valid exit status")
         else:
