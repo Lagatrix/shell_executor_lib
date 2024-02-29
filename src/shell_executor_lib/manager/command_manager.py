@@ -1,12 +1,33 @@
 """Make commands in the shell."""
 
-import asyncio
-from asyncio.subprocess import Process
 from shell_executor_lib import CommandError
+from shell_executor_lib.errors import AuthenticationError, PrivilegesError
+from shell_executor_lib.manager.command_executor import executor
 
 
 class CommandManager:
     """Make commands in the shell."""
+
+    @classmethod
+    async def init(cls, user: str, password: str) -> 'CommandManager':
+        """Initialize the class.
+
+        Args:
+            user: The user of the shell who execute command.
+            password: The password of the user.
+
+        Returns:
+            A CommandManager instance.
+
+        Raises:
+            AuthenticationError: If the user authentication fails.
+        """
+        try:
+            await executor(f"/bin/su - {user}", password)
+
+            return cls(user, password)
+        except CommandError:
+            raise AuthenticationError(user)
 
     def __init__(self, user: str, password: str) -> None:
         """Initialize the class.
@@ -16,9 +37,9 @@ class CommandManager:
             password: The password of the user.
         """
         self.user = user
-        self.password = password
+        self.__password = password
 
-    async def execute_command(self, command: str, sudo: bool, *stdin: str) -> list[str]:
+    async def execute_command(self, command: str, sudo: bool = False, *stdin: str) -> list[str]:
         """Execute a command into the shell.
 
         Args:
@@ -31,46 +52,13 @@ class CommandManager:
 
         Raises:
             CommandError: If the exit code is not 0.
-
+            PrivilegesError: If the user doesn't have sudo privileges.
         """
-        process = await asyncio.create_subprocess_shell(
-            f"su - {self.user} -c \"{'sudo -S ' if sudo else ''}{command}\"",
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
+        if sudo:
+            try:
+                return await executor(f"su - {self.user} -c \"sudo -S {command}\"", self.__password,
+                                      self.__password, *stdin)
+            except CommandError:
+                raise PrivilegesError(self.user)
 
-        await self.__set_stdin(process, sudo, *stdin)
-
-        if process.stdout and process.stderr is not None:
-            output, error = await asyncio.gather(process.stdout.read(), process.stderr.read())
-            await process.wait()
-
-            if isinstance(process.returncode, int):
-                if process.returncode != 0:
-                    raise CommandError(int(process.returncode), error.decode())
-                return output.decode().rstrip().split("\n")
-
-            raise CommandError(-1, "Not valid exit status")
-        else:
-            raise CommandError(-2, "Stdout and stderr read error")
-
-    async def __set_stdin(self, process: Process, sudo: bool, *stdin: str) -> None:
-        """Put the stdin data into the command.
-
-        Args:
-            process: The process of the command to exec.
-            sudo: If the command require sudo privileges.
-            *stdin: Stdin params of the command.
-        """
-        if process.stdin is not None:
-            process.stdin.write(self.password.encode() + b"\n")
-            await process.stdin.drain()
-
-            if sudo:
-                process.stdin.write(self.password.encode() + b"\n")
-                await process.stdin.drain()
-
-            for param in stdin:
-                process.stdin.write(param.encode() + b"\n")
-                await process.stdin.drain()
+        return await executor(f"su - {self.user} -c \"{command}\"", self.__password, *stdin)

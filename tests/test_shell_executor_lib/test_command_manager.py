@@ -1,47 +1,36 @@
-"""Test the command manager."""
-
+"""Test the CommandManager."""
 import unittest
 from unittest import mock
 
-from mock_shell_executor_lib import mock_subprocess_correct, mock_subprocess_error_exit_code, \
-    mock_subprocess_invalid_exit_code, mock_subprocess_invalid_outs
-from shell_executor_lib import CommandManager, CommandError
+from mock_shell_executor_lib import mock_asyncio_subprocess, mock_subprocess_correct, mock_output_data, \
+    mock_subprocess_error_exit_code
+from shell_executor_lib import CommandManager, PrivilegesError, AuthenticationError
 
 
-class MockCommandManager(unittest.IsolatedAsyncioTestCase):
-    """Test the command manager."""
-
-    def setUp(self) -> None:
-        """Set up the test case."""
-        self.command_manager = CommandManager("augusto", "augusto")
+class TestCommandManager(unittest.IsolatedAsyncioTestCase):
+    """Test the CommandManager."""
 
     async def test_execute_command(self) -> None:
-        """Test correctly functioning of command manager."""
-        with mock.patch('asyncio.create_subprocess_shell', return_value=mock_subprocess_correct):
-            self.assertEquals(await self.command_manager.execute_command("ls", True),
-                              ["Output data", "Output data", "Output data"])
+        """Test correctly when execute a command."""
+        with mock.patch(mock_asyncio_subprocess, side_effect=(mock_subprocess_correct, mock_subprocess_correct)):
+            self.assertEqual(await (await CommandManager.init("augusto", "augusto"))
+                             .execute_command("ls", False), mock_output_data)
 
-    async def test_execute_command_with_stdin(self) -> None:
-        """Test correctly functioning of command manager with stdin."""
-        with mock.patch('asyncio.create_subprocess_shell', return_value=mock_subprocess_correct):
-            self.assertEquals(await self.command_manager.execute_command("ls", True, "Input data",
-                                                                         "Input data", "Input data"),
-                              ["Output data", "Output data", "Output data"])
+    async def test_user_or_password_not_valid(self) -> None:
+        """Test error if the user or password is not valid."""
+        with mock.patch(mock_asyncio_subprocess, return_value=mock_subprocess_error_exit_code):
+            with self.assertRaises(AuthenticationError):
+                await CommandManager.init("augusto", "augusto")
 
-    async def test_execute_command_exit_code_error(self) -> None:
-        """Test error on exit status code of command manager."""
-        with mock.patch('asyncio.create_subprocess_shell', return_value=mock_subprocess_error_exit_code):
-            with self.assertRaises(CommandError):
-                await self.command_manager.execute_command("ls", False)
+    async def test_execute_command_with_privileges(self) -> None:
+        """Test correctly when execute a command with privileges."""
+        with mock.patch(mock_asyncio_subprocess, side_effect=(mock_subprocess_correct, mock_subprocess_correct)):
+            self.assertEqual(await (await CommandManager.init("augusto", "augusto"))
+                             .execute_command("ls", True), mock_output_data)
 
-    async def test_execute_command_invalid_exit_code_error(self) -> None:
-        """Test error an invalid exit status code of command manager."""
-        with mock.patch('asyncio.create_subprocess_shell', return_value=mock_subprocess_invalid_exit_code):
-            with self.assertRaises(CommandError):
-                await self.command_manager.execute_command("ls", True)
-
-    async def test_execute_command_invalid_outs(self) -> None:
-        """Test error invalid stout and stderr of command manager."""
-        with mock.patch('asyncio.create_subprocess_shell', return_value=mock_subprocess_invalid_outs):
-            with self.assertRaises(CommandError):
-                await self.command_manager.execute_command("ls", True)
+    async def test_execute_command_with_privileges_error(self) -> None:
+        """Test error if the user does not have privileges."""
+        with mock.patch(mock_asyncio_subprocess, side_effect=(mock_subprocess_correct,
+                                                              mock_subprocess_error_exit_code)):
+            with self.assertRaises(PrivilegesError):
+                await (await CommandManager.init("augusto", "augusto")).execute_command("ls", True)

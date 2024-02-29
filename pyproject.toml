@@ -1,7 +1,7 @@
 [project]
 name = "shell_executor_lib"
-version = "0.1.2"
-description = "This library execute async commands in shell"
+version = "0.2.0"
+description = "This library execute commands asynchronously in the shell"
 
 maintainers = [
     { name = "Francisco Javier Fraga Hernández", email = "fcojavierfraga@tutanota.com" }
@@ -13,8 +13,8 @@ authors = [
 
 [tool.poetry]
 name = "shell_executor_lib"
-version = "0.1.2"
-description = "This library execute async commands in shell"
+version = "0.2.0"
+description = "This library execute commands asynchronously in the shell"
 keywords = ["Python", "Library", "Commands"]
 license = "Apache License"
 

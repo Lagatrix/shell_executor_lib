@@ -20,3 +20,5 @@ mock_subprocess_invalid_outs = AsyncMock()
 mock_subprocess_invalid_outs.stdout = None
 mock_subprocess_invalid_outs.stderr = None
 mock_subprocess_invalid_outs.returncode = 0
+
+mock_output_data = ["Output data", "Output data", "Output data"]
