@@ -11,6 +11,11 @@ mock_subprocess_error_exit_code.stdout.read.return_value = b"Output data\nOutput
 mock_subprocess_error_exit_code.stderr.read.return_value = b""
 mock_subprocess_error_exit_code.returncode = 1
 
+mock_subprocess_sudo_error_exit_code = AsyncMock()
+mock_subprocess_sudo_error_exit_code.stdout.read.return_value = b""
+mock_subprocess_sudo_error_exit_code.stderr.read.return_value = b"pepe is not in the sudoers file."
+mock_subprocess_sudo_error_exit_code.returncode = 1
+
 mock_subprocess_invalid_exit_code = AsyncMock()
 mock_subprocess_invalid_exit_code.stdout.read.return_value = b"Output data\nOutput data\nOutput data"
 mock_subprocess_invalid_exit_code.stderr.read.return_value = b""

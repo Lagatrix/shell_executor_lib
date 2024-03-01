@@ -3,8 +3,8 @@ import unittest
 from unittest import mock
 
 from mock_shell_executor_lib import mock_asyncio_subprocess, mock_subprocess_correct, mock_output_data, \
-    mock_subprocess_error_exit_code
-from shell_executor_lib import CommandManager, PrivilegesError, AuthenticationError
+    mock_subprocess_error_exit_code, mock_subprocess_sudo_error_exit_code
+from shell_executor_lib import CommandManager, PrivilegesError, AuthenticationError, CommandError
 
 
 class TestCommandManager(unittest.IsolatedAsyncioTestCase):
@@ -28,9 +28,16 @@ class TestCommandManager(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(await (await CommandManager.init("augusto", "augusto"))
                              .execute_command("ls", True), mock_output_data)
 
-    async def test_execute_command_with_privileges_error(self) -> None:
-        """Test error if the user does not have privileges."""
+    async def test_execute_command_with_privileges_using_no_sudo_user(self) -> None:
+        """Test error if the command return an error."""
+        with mock.patch(mock_asyncio_subprocess, side_effect=(mock_subprocess_correct,
+                                                              mock_subprocess_sudo_error_exit_code)):
+            with self.assertRaises(PrivilegesError):
+                await (await CommandManager.init("augusto", "augusto")).execute_command("ls", True)
+
+    async def test_error_when_execute_command_with_privileges(self) -> None:
+        """Test error if the command return an error."""
         with mock.patch(mock_asyncio_subprocess, side_effect=(mock_subprocess_correct,
                                                               mock_subprocess_error_exit_code)):
-            with self.assertRaises(PrivilegesError):
+            with self.assertRaises(CommandError):
                 await (await CommandManager.init("augusto", "augusto")).execute_command("ls", True)

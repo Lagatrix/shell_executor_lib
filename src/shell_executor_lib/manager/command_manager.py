@@ -58,7 +58,9 @@ class CommandManager:
             try:
                 return await executor(f"su - {self.user} -c \"sudo -S {command}\"", self.__password,
                                       self.__password, *stdin)
-            except CommandError:
-                raise PrivilegesError(self.user)
+            except CommandError as command_error:
+                if "is not in the sudoers file" in command_error.response:
+                    raise PrivilegesError(self.user)
+                raise command_error
 
         return await executor(f"su - {self.user} -c \"{command}\"", self.__password, *stdin)
